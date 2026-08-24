@@ -17,7 +17,7 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.Preference.OnPreferenceChangeListener
 import androidx.preference.PreferenceCategory
-import androidx.preference.SeekBarPreference
+import com.android.settingslib.widget.SliderPreference
 import androidx.preference.SwitchPreferenceCompat
 import co.aospa.dolby.xiaomi.DolbyConstants
 import co.aospa.dolby.xiaomi.DolbyConstants.Companion.PREF_BASS
@@ -57,7 +57,7 @@ class DolbySettingsFragment : SettingsBasePreferenceFragment(),
         findPreference<SwitchPreferenceCompat>(PREF_DIALOGUE)!!
     }
     private val dialogueAmountPref by lazy {
-        findPreference<SeekBarPreference>(PREF_DIALOGUE_AMOUNT)!!
+        findPreference<SliderPreference>(PREF_DIALOGUE_AMOUNT)!!
     }
     private val bassPref by lazy {
         findPreference<SwitchPreferenceCompat>(PREF_BASS)!!
@@ -78,7 +78,7 @@ class DolbySettingsFragment : SettingsBasePreferenceFragment(),
         findPreference<Preference>("dolby_adv_settings_footer")!!
     }
     private var volumePref: SwitchPreferenceCompat? = null
-    private var stereoPref: SeekBarPreference? = null
+    private var stereoPref: SliderPreference? = null
 
     private val dolbyController by lazy { DolbyController.getInstance(requireContext()) }
     private val audioManager by lazy { requireContext().getSystemService(AudioManager::class.java)!! }
@@ -108,7 +108,7 @@ class DolbySettingsFragment : SettingsBasePreferenceFragment(),
         dlog(TAG, "onCreatePreferences")
         setPreferencesFromResource(R.xml.dolby_settings, rootKey)
 
-        stereoPref = findPreference<SeekBarPreference>(PREF_STEREO_WIDENING)!!
+        stereoPref = findPreference<SliderPreference>(PREF_STEREO_WIDENING)!!
         if (!resources.getBoolean(R.bool.dolby_stereo_widening_supported)) {
             settingsCategory.removePreference(stereoPref!!)
             stereoPref = null
