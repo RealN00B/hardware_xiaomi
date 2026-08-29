@@ -12,7 +12,7 @@ import co.aospa.dolby.xiaomi.DolbyConstants.DsParam
 import java.util.UUID
 
 class DolbyAudioEffect(priority: Int, audioSession: Int) : AudioEffect(
-    EFFECT_TYPE_NULL, EFFECT_TYPE_DAP, priority, audioSession
+    EFFECT_TYPE_NULL, getEffectUuid(), priority, audioSession
 ) {
 
     var dsOn: Boolean
@@ -86,8 +86,23 @@ class DolbyAudioEffect(priority: Int, audioSession: Int) : AudioEffect(
 
     companion object {
         private const val TAG = "DolbyAudioEffect"
-        private val EFFECT_TYPE_DAP =
+        private val EFFECT_TYPE_DAP_HW =
             UUID.fromString("9d4921da-8225-4f29-aefa-39537a04bcaa")
+        private val EFFECT_TYPE_DAP_SW =
+            UUID.fromString("6ab06da4-c516-4611-8166-452799218539")
+
+        private fun getEffectUuid(): UUID {
+            val effects = queryEffects() ?: return EFFECT_TYPE_DAP_SW
+            for (desc in effects) {
+                if (desc.uuid == EFFECT_TYPE_DAP_SW) {
+                    return EFFECT_TYPE_DAP_SW
+                }
+                if (desc.uuid == EFFECT_TYPE_DAP_HW) {
+                    return EFFECT_TYPE_DAP_HW
+                }
+            }
+            return EFFECT_TYPE_DAP_SW
+        }
 
         private const val EFFECT_PARAM_ENABLE = 0
         private const val EFFECT_PARAM_CPDP_VALUES = 5
