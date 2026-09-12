@@ -13,6 +13,7 @@ import android.media.AudioManager
 import android.media.AudioManager.AudioPlaybackCallback
 import android.media.AudioPlaybackConfiguration
 import android.os.Handler
+import android.os.UserManager
 import android.util.Log
 import androidx.preference.PreferenceManager
 import co.aospa.dolby.xiaomi.DolbyConstants.Companion.dlog
@@ -181,21 +182,30 @@ internal class DolbyController private constructor(
     }
 
     private fun maybeMigratePresets() {
+        val userManager = context.getSystemService(UserManager::class.java)
+        if (userManager != null && !userManager.isUserUnlocked) {
+            dlog(TAG, "user not unlocked yet, skipping preset migration")
+            return
+        }
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         if (prefs.getBoolean(PREF_KEY_PRESETS_MIGRATED, false)) {
             return
         }
-        val ceContext = context.createCredentialProtectedStorageContext()
-        val cePrefs = ceContext.getSharedPreferences(PREF_PRESETS, Context.MODE_PRIVATE)
-        if (cePrefs.all.isEmpty()) {
-            dlog(TAG, "no presets to migrate")
-            return
-        }
-        if (context.moveSharedPreferencesFrom(ceContext, PREF_PRESETS)) {
-            prefs.edit().putBoolean(PREF_KEY_PRESETS_MIGRATED, true).apply()
-            dlog(TAG, "presets migrated successfully")
-        } else {
-            Log.w(TAG, "failed to migrate presets")
+        try {
+            val ceContext = context.createCredentialProtectedStorageContext()
+            val cePrefs = ceContext.getSharedPreferences(PREF_PRESETS, Context.MODE_PRIVATE)
+            if (cePrefs.all.isEmpty()) {
+                dlog(TAG, "no presets to migrate")
+                return
+            }
+            if (context.moveSharedPreferencesFrom(ceContext, PREF_PRESETS)) {
+                prefs.edit().putBoolean(PREF_KEY_PRESETS_MIGRATED, true).apply()
+                dlog(TAG, "presets migrated successfully")
+            } else {
+                Log.w(TAG, "failed to migrate presets")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "failed to migrate presets", e)
         }
     }
 
